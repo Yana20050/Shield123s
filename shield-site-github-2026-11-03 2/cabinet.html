@@ -1,0 +1,704 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><body>
+<link rel="stylesheet" href="shiny-button.css?v=20260923l">
+<title>SHIELD — Кабінет клієнта</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: Odoo portal structure (cards, statusbar, notebook tabs) in SHIELD's black-and-chrome identity; dark header + Sheriff-style dark left navigation, steel-grey work area. */
+:root{color-scheme:dark;
+  --primary:#2f5bff; --primary-hover:#4d7fff; --primary-fg:#FFFFFF; --secondary:#8fa6ff;
+  --chrome-bg:#05070f; --chrome-bg-2:#0c1024; --chrome-line:#1c2347; --chrome-fg:#e9ecf8; --chrome-muted:#8e96b8;
+  --metal:linear-gradient(135deg,#7fa0ff 0%,#2f5bff 100%);
+  --display:"Inter",system-ui,-apple-system,sans-serif;
+  --bg:#080b18; --surface:#0f1430; --surface-2:#151b3d; --border:#262e5c; --border-soft:#1c2347;
+  --fg:#e9ecf8; --muted:#98a0c0; --link:#8fa6ff;
+  --success:#4CC56B; --success-bg:#16331f; --success-fg:#9BE0AE;
+  --warning:#F0B43C; --warning-bg:#3a3017; --warning-fg:#F3D48C;
+  --danger:#F07C87; --danger-bg:#46242A; --danger-fg:#F6B7BE;
+  --info-bg:#14305e; --info-fg:#a9c6ff; --src-bg:#1a2350; --src-fg:#b4c3ff;
+  --font:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  --mono:SFMono-Regular,Menlo,Consolas,monospace;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.5}
+a{color:var(--link);text-decoration:none} a:hover{text-decoration:underline}
+h1,h2,h3{margin:0;font-weight:600;text-wrap:balance}
+h1{font-family:var(--display);font-weight:700;font-size:1.3rem;letter-spacing:.02em;line-height:1.35}
+h2{font-size:1.05rem} h3{font-size:1rem}
+.num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--secondary);outline-offset:2px}
+
+/* header */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--chrome-bg)}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--chrome-bg);border-bottom:1px solid var(--chrome-line);color:var(--chrome-fg)}
+.topbar::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;background:linear-gradient(90deg,transparent,#2f5bff 30%,#8fa6ff 50%,#2f5bff 70%,transparent);opacity:.55}
+.topbar-in{display:flex;align-items:center;gap:16px;min-height:64px;max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.logo{display:flex;align-items:center;gap:12px}
+.logo:hover{text-decoration:none}
+.logo .emblem{width:40px;height:40px;border-radius:50%;box-shadow:0 0 0 1px #2c3a80,0 2px 14px rgba(47,91,255,.35)}
+.logo .wordmark{height:15px;width:auto}
+.logo .sub{font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--chrome-muted);border-left:1px solid var(--chrome-line);padding-left:12px}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:16px}
+.src-toggle{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--chrome-muted);cursor:pointer;user-select:none}
+.user-chip{display:flex;align-items:center;gap:8px;font-weight:500}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--metal);color:#fff;display:grid;place-items:center;font-size:.75rem;font-weight:700;box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+@media (max-width:640px){.user-name,.src-toggle span,.logo .sub{display:none}.logo .wordmark{height:12px}}
+
+.back-site{font-size:.85rem;font-weight:600;color:var(--chrome-fg);border:1px solid var(--chrome-line);border-radius:999px;padding:6px 14px}.back-site:hover{background:rgba(255,255,255,.06);text-decoration:none}
+@media (max-width:640px){.back-site{padding:5px 10px;font-size:.78rem}}
+
+
+
+/* === site card look: dark glass cards with blue glow, asymmetric corners === */
+body{background:radial-gradient(60% 40% at 80% 0%,rgba(47,91,255,.14),transparent 70%),#05060f}
+.card,.kpi,.hero,.side{background:radial-gradient(circle at 15% 115%,#3a5cd6 0%,#161f45 42%,#05060f 78%);border:1px solid rgba(120,150,255,.16);border-radius:28px 28px 10px 28px;box-shadow:0 18px 50px -18px rgba(47,91,255,.35)}
+.hero{padding:34px}
+.card-h{border-bottom:1px solid rgba(255,255,255,.1);padding:18px 24px}
+.card-b{padding:24px}
+.kpi{padding:24px}
+.kpi .v{font-weight:700;font-size:1.6rem;letter-spacing:-.01em}
+.card-h h2,.card-h h3{font-weight:700}
+th{background:rgba(255,255,255,.05)}
+td,th{border-bottom-color:rgba(255,255,255,.08)}
+tfoot td{background:rgba(255,255,255,.05)}
+.obj-ico{border-radius:50%;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12)}
+.btn{border-radius:999px;padding:10px 20px}
+.btn:not(.btn-primary):not(.btn-secondary):not(.btn-link):not(.btn-danger){background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.14);color:#fff}
+.side{padding:14px 0}
+.side a{border-left:0;border-radius:999px;margin:2px 12px;padding:9px 14px}
+.side a.active{border-image:none;border-left:0;background:rgba(255,255,255,.14)}
+.side a .cnt{background:#fff;color:#11162f}
+.side-promo{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:20px}
+.plan-opt,.alert{border-radius:20px}
+.plan-opt{background:rgba(255,255,255,.04)}
+.tabs button.on{background:rgba(255,255,255,.08)}
+input[type=text],input[type=number],input[type=tel],input[type=email],select,textarea{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.16);border-radius:14px}
+@media (max-width:900px){.side{border-radius:22px;padding:4px}.side a{margin:0 2px}}
+
+/* sidebar + cards: same glass sheen as site process cards */
+.side,.card,.kpi,.hero{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.12);box-shadow:0 20px 40px -18px rgba(47,91,255,.5)}
+.side{position:sticky;overflow:hidden}
+.side::before,.card::before,.kpi::before,.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 100% 0%,rgba(255,255,255,.18),transparent 55%);pointer-events:none;z-index:0}
+.side>*,.card>*,.kpi>*,.hero>*{position:relative;z-index:1}
+.hero .wm{position:absolute}
+.side-group+.side-group{border-top:1px solid rgba(255,255,255,.1);margin:0 20px}
+.side-group{padding:10px 0}
+.side-label{padding:8px 4px 6px;color:#a9adc9}
+.side a{margin:2px -8px;padding:10px 16px;border-radius:999px;border:1px solid transparent;opacity:.92}
+.side a:hover{background:rgba(255,255,255,.08)}
+.side a.active{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.16);box-shadow:inset 0 0 18px rgba(140,175,255,.25)}
+.side-promo{margin:10px 16px 6px}
+@media (max-width:900px){.side-group+.side-group{margin:0}.side a{margin:0 2px}}
+
+/* side fix */
+.side-group{padding:10px 12px}
+.side-group+.side-group{margin:0 12px;padding-inline:0}
+.side a{margin:2px 0}
+.side-label{padding:8px 12px 6px}
+.side{overflow-y:auto;max-height:calc(100vh - 100px);scrollbar-width:none}
+.side a:focus-visible{outline:0}
+@media (max-width:900px){.side{max-height:none}.side-group,.side-group+.side-group{padding:0;margin:0}.side a{margin:0 2px}}
+
+/* side: strong blue stretch like site cards */
+.side{background:radial-gradient(130% 55% at 10% 108%,#4a74ff 0%,#3a5cd6 25%,#16224f 60%,transparent 85%),#05060f}
+@media (max-width:900px){.side{background:radial-gradient(circle at 15% 115%,#3a5cd6 0%,#161f45 42%,#05060f 78%)}}
+
+/* side: exact site-card gradient (fixed-size circle so a tall block looks like the square card) */
+.side{background:radial-gradient(circle 440px at 15% calc(100% + 50px),#3a5cd6 0%,#161f45 42%,#05060f 78%);border-radius:28px 28px 10px 28px}
+@media (max-width:900px){.side{background:radial-gradient(circle at 15% 115%,#3a5cd6 0%,#161f45 42%,#05060f 78%)}}
+/* transitions */
+@keyframes cabIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes cabPage{from{opacity:0}to{opacity:1}}
+body{animation:cabPage .5s ease both}
+.view:not([hidden]){animation:cabIn .45s cubic-bezier(.22,1,.36,1) both}
+.view:not([hidden]) > .card,.view:not([hidden]) .grid > *{animation:cabIn .5s cubic-bezier(.22,1,.36,1) both}
+.view:not([hidden]) .grid > :nth-child(2){animation-delay:.05s}
+.view:not([hidden]) .grid > :nth-child(3){animation-delay:.1s}
+.view:not([hidden]) .grid > :nth-child(4){animation-delay:.15s}
+.card,.btn,.side a,.back-site,.plan-opt,.tabs button{transition:background .2s,border-color .2s,transform .2s,box-shadow .2s,color .2s}
+.card:hover{border-color:var(--border)}
+.btn:hover{transform:translateY(-1px)}
+body.leaving{opacity:0;transition:opacity .35s ease}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+/* shell */
+.shell{display:grid;grid-template-columns:240px minmax(0,1fr);gap:24px;max-width:1240px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+@media (max-width:900px){.shell{grid-template-columns:minmax(0,1fr);gap:12px}}
+
+/* sidebar */
+.side{align-self:start;position:sticky;top:calc(env(safe-area-inset-top,0px) + 84px);background:var(--chrome-bg-2);border:1px solid var(--chrome-line);border-radius:var(--radius);padding:8px 0;color:var(--chrome-fg)}
+.side-group{padding:6px 0}
+.side-group+.side-group{border-top:1px solid var(--chrome-line)}
+.side-label{font-family:var(--display);font-size:.6rem;text-transform:uppercase;letter-spacing:.14em;color:var(--chrome-muted);padding:8px 16px 4px}
+.side a{display:flex;align-items:center;gap:10px;padding:8px 16px;color:var(--chrome-fg);border-left:3px solid transparent;opacity:.86}
+.side a:hover{background:rgba(255,255,255,.04);text-decoration:none;opacity:1}
+.side a.active{border-image:var(--metal) 1;border-left-width:3px;border-left-style:solid;background:rgba(255,255,255,.07);color:#FFFFFF;font-weight:600;opacity:1}
+.side a .cnt{margin-left:auto;font-size:.72rem;font-weight:700;background:var(--metal);color:#fff;border-radius:10px;padding:0 7px}
+.side svg{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.side-promo{margin:10px 12px 6px;padding:12px;border-radius:var(--radius);background:linear-gradient(135deg,#161f45,#1f2d6b);border:1px solid #2c3a80;color:var(--chrome-fg);font-size:.82rem}
+.side-promo b{display:block;font-family:var(--display);font-weight:700;font-size:.85rem;margin-bottom:2px;background:var(--metal);-webkit-background-clip:text;background-clip:text;color:transparent}
+@media (max-width:900px){
+  .side{position:static;display:flex;overflow-x:auto;padding:0;gap:0;scrollbar-width:none}
+  .side-group{display:flex;padding:0;border:0!important}
+  .side-label,.side-promo{display:none}
+  .side a{white-space:nowrap;border-left:0;border-bottom:3px solid transparent;padding:10px 12px}
+  .side a.active{border-image:none;border-left:0;border-bottom:3px solid #4d7fff}
+}
+
+/* content */
+.crumbs{display:flex;flex-wrap:wrap;gap:6px;align-items:center;color:var(--muted);font-size:.85rem;margin-bottom:12px}
+.crumbs a{color:var(--muted)}
+.view{display:grid;gap:16px;min-width:0}
+.view-head{display:flex;flex-wrap:wrap;align-items:center;gap:12px;justify-content:space-between}
+.card{background:var(--surface);border:1px solid var(--border-soft);border-radius:var(--radius);min-width:0}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border-soft)}
+.card-b{padding:16px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.muted{color:var(--muted)} .small{font-size:.82rem}
+
+.btn{border-radius:999px!important;display:inline-flex;align-items:center;gap:6px;border:1px solid transparent;border-radius:var(--radius);padding:6px 12px;font:inherit;font-weight:500;cursor:pointer;background:var(--surface-2);color:var(--fg);border-color:var(--border)}
+.btn:hover{text-decoration:none;filter:brightness(.97)}
+.btn-primary{background:var(--primary);border-color:var(--primary);color:var(--primary-fg)}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-secondary{background:var(--metal);border-color:#4d7fff;color:#fff}
+.btn-link{background:none;border-color:transparent;color:var(--link);padding-inline:4px}
+.btn-danger{background:none;color:var(--danger);border-color:var(--danger)}
+.btn-row{display:flex;flex-wrap:wrap;gap:8px}
+
+.badge{display:inline-block;font-size:.75rem;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.b-ok{background:var(--success-bg);color:var(--success-fg)}
+.b-warn{background:var(--warning-bg);color:var(--warning-fg)}
+.b-bad{background:var(--danger-bg);color:var(--danger-fg)}
+.b-info{background:var(--info-bg);color:var(--info-fg)}
+.b-mute{background:var(--surface-2);color:var(--muted);border:1px solid var(--border-soft)}
+
+/* data-source tags (developer overlay) */
+.src{display:none;font-family:var(--mono);font-size:.7rem;background:var(--src-bg);color:var(--src-fg);padding:1px 6px;border-radius:3px;white-space:nowrap}
+.show-src .src{display:inline-block}
+
+/* balance + kpis */
+.kpi{padding:16px;display:grid;gap:4px}
+.kpi .v{font-family:var(--display);font-size:1.2rem;line-height:1.6}
+
+/* home hero band */
+.hero{position:relative;overflow:hidden;background:radial-gradient(circle at 15% 115%,#3a5cd6 0%,#161f45 42%,#05060f 78%);color:var(--chrome-fg);border:1px solid var(--chrome-line);border-radius:var(--radius);padding:24px;display:grid;gap:6px}
+.hero h1{background:var(--metal);-webkit-background-clip:text;background-clip:text;color:transparent;font-size:1.45rem;max-width:22ch}
+.hero .sub{color:var(--chrome-muted);font-size:.85rem;position:relative}
+.hero .wm{position:absolute;right:-30px;top:50%;transform:translateY(-50%);width:220px;height:220px;opacity:.22;border-radius:50%;pointer-events:none}
+.hero .stat{position:relative;display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:10px;font-size:.85rem}
+.hero .stat b{color:#FFFFFF}
+@media (max-width:640px){.hero .wm{width:150px;height:150px;right:-40px}}
+.kpi .v.neg{color:var(--danger)} .kpi .v.pos{color:var(--success)}
+
+/* object card */
+.obj{display:grid;gap:10px;padding:16px}
+.obj-top{display:flex;gap:12px;align-items:flex-start}
+.obj-ico{width:40px;height:40px;border-radius:var(--radius);background:var(--surface-2);border:1px solid var(--border-soft);display:grid;place-items:center;flex:none}
+.obj-ico svg{width:22px;height:22px;stroke:var(--fg);fill:none;stroke-width:1.7}
+.armed{display:flex;align-items:center;gap:6px;font-weight:600}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--success);box-shadow:0 0 0 3px var(--success-bg)}
+.dot.off{background:var(--muted);box-shadow:0 0 0 3px var(--surface-2)}
+.dl{display:grid;grid-template-columns:max-content minmax(0,1fr);gap:6px 16px;margin:0}
+.dl dt{color:var(--muted)} .dl dd{margin:0;font-weight:500}
+
+/* Odoo statusbar */
+.statusbar{display:flex;flex-wrap:wrap;gap:0;justify-content:flex-end}
+.statusbar span{position:relative;padding:4px 14px 4px 20px;font-size:.8rem;background:var(--surface-2);color:var(--muted);border:1px solid var(--border-soft);margin-left:-1px;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 50%,calc(100% - 8px) 100%,0 100%,8px 50%)}
+.statusbar span:first-child{clip-path:polygon(0 0,calc(100% - 8px) 0,100% 50%,calc(100% - 8px) 100%,0 100%);padding-left:12px}
+.statusbar span.on{background:var(--primary);color:var(--primary-fg);border-color:var(--primary)}
+
+/* tables */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{padding:9px 12px;border-bottom:1px solid var(--border-soft);text-align:left;vertical-align:middle}
+th{font-size:.78rem;color:var(--muted);font-weight:600;background:var(--surface-2);white-space:nowrap}
+td.r,th.r{text-align:right}
+tr:last-child td{border-bottom:0}
+tfoot td{font-weight:600;background:var(--surface-2)}
+
+/* tabs (Odoo notebook) */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);overflow-x:auto}
+.tabs button{border:1px solid transparent;border-bottom:0;background:none;padding:8px 14px;font:inherit;color:var(--muted);cursor:pointer;margin-bottom:-1px;border-radius:var(--radius) var(--radius) 0 0;white-space:nowrap}
+.tabs button.on{background:var(--surface);border-color:var(--border);color:var(--fg);font-weight:600}
+
+/* timeline (Odoo chatter-like) */
+.tl{display:grid;gap:0}
+.tl-item{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:10px;padding:10px 0;border-bottom:1px dashed var(--border-soft)}
+.tl-item:last-child{border-bottom:0}
+.tl-dot{width:10px;height:10px;border-radius:50%;margin-top:5px;background:var(--muted)}
+.tl-dot.ok{background:var(--success)} .tl-dot.warn{background:var(--warning)} .tl-dot.bad{background:var(--danger)}
+
+/* forms */
+.field{display:grid;gap:4px}
+.field label{font-weight:600;font-size:.85rem}
+input[type=text],input[type=number],input[type=tel],input[type=email],select,textarea{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:7px 10px;width:100%}
+textarea{min-height:90px;resize:vertical}
+.switch{display:flex;align-items:center;gap:10px;cursor:pointer}
+.switch input{width:36px;height:20px;appearance:none;background:var(--border);border-radius:10px;position:relative;cursor:pointer;flex:none;transition:background .15s}
+.switch input::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s}
+.switch input:checked{background:var(--success)} .switch input:checked::after{left:18px}
+
+.alert{padding:12px 16px;border-radius:var(--radius);border:1px solid transparent}
+.alert-warn{background:var(--warning-bg);color:var(--warning-fg)}
+.alert-info{background:var(--info-bg);color:var(--info-fg)}
+
+details.faq{border-bottom:1px solid var(--border-soft)}
+details.faq summary{cursor:pointer;padding:12px 16px;font-weight:500;list-style:none;display:flex;justify-content:space-between;gap:12px}
+details.faq summary::after{content:"+";color:var(--muted)}
+details.faq[open] summary::after{content:"−"}
+details.faq p{margin:0;padding:0 16px 14px;color:var(--muted);max-width:70ch}
+
+.toast{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:var(--radius);box-shadow:0 4px 16px rgba(0,0,0,.2);z-index:20}
+.plan-opt{display:grid;gap:4px;padding:14px;border:1px solid var(--border);border-radius:var(--radius);cursor:pointer}
+.plan-opt:has(input:checked){border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
+.plan-opt .price{font-size:1.2rem;font-weight:600}
+.copy-row{display:flex;gap:8px} .copy-row input{min-width:0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* side gradient must beat the later base rule */
+nav.side{background:radial-gradient(circle 440px at 15% calc(100% + 50px),#3a5cd6 0%,#161f45 42%,#05060f 78%) !important;border:1px solid rgba(255,255,255,.12) !important;border-radius:28px 28px 10px 28px !important;box-shadow:0 20px 40px -18px rgba(47,91,255,.5)}
+@media (max-width:900px){nav.side{background:radial-gradient(circle at 15% 115%,#3a5cd6 0%,#161f45 42%,#05060f 78%) !important;border-radius:22px !important}}
+
+.back-site.shiny-btn{border:1px solid transparent;padding:10px 20px;color:#fff;font-size:.85rem}.back-site.shiny-btn:hover{background:linear-gradient(#000,#000) padding-box,conic-gradient(from calc(var(--gleam-angle) - var(--gleam-angle-offset)),transparent,var(--gleam-accent) var(--gleam-percent),var(--gleam-shine) calc(var(--gleam-percent) * 2),var(--gleam-accent) calc(var(--gleam-percent) * 3),transparent calc(var(--gleam-percent) * 4)) border-box}
+/* icons */
+.ic{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);flex:none;color:#cfdcff}
+.ic svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.card-h h2,.card-h h3{display:flex;align-items:center;gap:10px}
+.kpi .ic{position:absolute;top:16px;right:16px;width:40px;height:40px;z-index:1}
+.kpi .ic svg{width:20px;height:20px}
+.btn .bi{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* home: fewer blocks */
+.hero-kpis{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin-top:18px;border-top:1px solid rgba(255,255,255,.14);padding-top:16px}
+.hero-kpis>div{display:grid;gap:2px;padding:0 18px;border-left:1px solid rgba(255,255,255,.12)}
+.hero-kpis>div:first-child{padding-left:0;border-left:0}
+.hero-kpis .muted{color:#aeb4d6}
+.hero-kpis .v{font-weight:700;font-size:1.35rem;letter-spacing:-.01em}
+.hero-kpis .v.neg{color:#ff9aa4}
+.hero-kpis .small{color:#d4d7e8}
+.phones-row{display:flex;flex-wrap:wrap;gap:6px 22px;padding:14px 24px 20px;border-top:1px solid rgba(255,255,255,.1);font-size:.9rem}
+.phones-row span{color:var(--muted)}.phones-row b{color:#fff;font-variant-numeric:tabular-nums}
+@media (max-width:700px){.hero-kpis{grid-template-columns:1fr 1fr;gap:14px 0}.hero-kpis>div:nth-child(3){padding-left:0;border-left:0}}
+
+/* convenience: client-friendly navigation */
+.src-toggle{display:none !important}
+.tabbar{display:none}
+.side a,.btn,.tabs button{min-height:40px}
+.alert-warn a{display:inline-flex;align-items:center;background:#fff;color:#11162f;font-weight:700;border-radius:999px;padding:6px 14px;margin-left:8px;text-decoration:none}
+@media (max-width:900px){
+  .side{display:none !important}
+  body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(5,7,15,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid rgba(255,255,255,.1);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
+  .tabbar a{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:14px;color:#9aa0c8;font-size:11px;font-weight:600;text-decoration:none;min-height:50px}
+  .tabbar svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .tabbar a.on{color:#fff;background:rgba(255,255,255,.12);box-shadow:inset 0 0 14px rgba(120,160,255,.25)}
+  .tabbar a.pay svg{color:#7fa0ff}
+  .toast{bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+  .shell{padding-top:12px}
+}
+</style>
+
+<header class="topbar"><div class="topbar-in">
+  <a class="logo" href="#home" aria-label="SHIELD — на головну">
+    <img class="emblem" src="media/cabinet/shield-emblem.png" alt="">
+    <img class="wordmark" src="media/cabinet/shield-wordmark.png" alt="SHIELD">
+    <span class="sub">Кабінет клієнта</span>
+  </a>
+  <div class="top-actions">
+    <a class="back-site" href="index.html">← На сайт</a>
+    <label class="src-toggle" title="Показати, з якої моделі Odoo береться кожен блок"><input type="checkbox" id="srcToggle"> <span>Джерела даних</span></label>
+    <div class="user-chip"><div class="avatar">ОК</div><span class="user-name">Олена Коваль</span></div>
+  </div>
+</div></header>
+
+<div class="shell" id="shell">
+  <nav class="side" aria-label="Розділи кабінету">
+    <div class="side-group">
+      <div class="side-label">Навігація</div>
+      <a href="#home" data-v="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Головна</a>
+    </div>
+    <div class="side-group">
+      <div class="side-label">Послуги</div>
+      <a href="#objects" data-v="objects"><svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5z"/></svg>Мої об'єкти<span class="cnt">2</span></a>
+      <a href="#subscription" data-v="subscription"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg>Підписки і тарифи</a>
+      <a href="#visits" data-v="visits"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-2.5z"/></svg>Виїзди техніка</a>
+      <a href="#tickets" data-v="tickets"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Заявки<span class="cnt">1</span></a>
+    </div>
+    <div class="side-group">
+      <div class="side-label">Оплата</div>
+      <a href="#pay" data-v="pay"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>Сплатити послуги</a>
+      <a href="#ledger" data-v="ledger"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>Історія розрахунків</a>
+      <a href="#invoices" data-v="invoices"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>Рахунки та акти</a>
+    </div>
+    <div class="side-group">
+      <div class="side-label">Мій профіль</div>
+      <a href="#documents" data-v="documents"><svg viewBox="0 0 24 24"><path d="M4 20h4L18.5 9.5a2.8 2.8 0 0 0-4-4L4 16z"/></svg>Договори і підпис<span class="cnt">1</span></a>
+      <a href="#profile" data-v="profile"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Профіль</a>
+      <a href="#referral" data-v="referral"><svg viewBox="0 0 24 24"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 22V7M12 7H8a2.5 2.5 0 1 1 0-5c3 0 4 5 4 5zM12 7h4a2.5 2.5 0 1 0 0-5c-3 0-4 5-4 5z"/></svg>Запроси друга</a>
+      <a href="#faq" data-v="faq"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg>Часті питання</a>
+    </div>
+    <div class="side-promo"><b>500 грн за друга</b>Поділіться посиланням — другу знижка 250 грн.</div>
+  </nav>
+
+  <main id="main">
+    <div class="crumbs" id="crumbs"></div>
+
+    <!-- HOME -->
+    <section class="view" data-view="home">
+      <div class="hero">
+        <img class="wm" src="media/cabinet/shield-emblem.png" alt="">
+        <span class="sub">Договір № SH-2026-0148 · клієнт з березня 2024</span>
+        <h1>Вітаємо, Олено</h1>
+        <div class="stat"><span><span class="dot" style="display:inline-block;margin-right:6px"></span>Квартира — <b>під охороною</b></span><span><span class="dot off" style="display:inline-block;margin-right:6px"></span>Офіс — <b>знято з охорони</b></span></div>
+      <div class="hero-kpis">
+          <div><span class="muted small">Баланс</span><span class="v neg num">−780 грн</span><span class="small">Борг за жовтень</span></div>
+          <div><span class="muted small">Абонплата / міс</span><span class="v num">1 230 грн</span><span class="small">2 об'єкти</span></div>
+          <div><span class="muted small">Наступний рахунок</span><span class="v num">01.11.2026</span><span class="small">Автоплатіж увімкнено</span></div>
+          <div><span class="muted small">Відкриті заявки</span><span class="v num">1</span><span class="small">Заміна батареї датчика</span></div>
+        </div>
+      </div>
+      <div class="alert alert-warn">Є неоплачений рахунок INV/2026/10/0148 на 780 грн. Сплатіть до 15.11.2026, щоб охорона не була призупинена. <a href="#pay">Сплатити зараз</a></div>
+
+      <div class="grid g2">
+        <div class="card">
+          <div class="card-h"><h2>Мої об'єкти</h2><a href="#objects" class="small">Усі об'єкти</a></div>
+          <div id="homeObjects"></div>
+        </div>
+        <div class="card" style="align-self:start"><div class="card-h"><h2>Швидкі дії</h2></div>
+            <div class="card-b btn-row">
+              <a class="btn btn-primary" href="#pay">Сплатити онлайн</a>
+              <a class="btn" href="#invoices">Отримати рахунок</a>
+              <a class="btn" href="#tickets">Нова заявка</a>
+              <a class="btn" href="#subscription">Додати послугу</a>
+            </div>
+            <div class="phones-row"><span>Пульт 24/7 <b>0 800 000 101</b></span><span>Call-center <b>0 800 000 114</b></span><span><a href="#tickets">Telegram</a> · <a href="#tickets">Viber</a></span></div></div>
+      </div>
+
+    </section>
+
+    <!-- OBJECTS -->
+    <section class="view" data-view="objects" hidden>
+      <div class="view-head"><h1>Мої об'єкти</h1><button class="btn btn-primary" data-toast="Заявку на підключення створено. Менеджер зателефонує сьогодні.">+ Підключити новий об'єкт</button></div>
+      <div class="grid g2" id="objList"></div>
+    </section>
+
+    <!-- OBJECT DETAIL -->
+    <section class="view" data-view="object" hidden>
+      <div class="card">
+        <div class="card-h" style="flex-wrap:wrap"><div><h1 id="objTitle"></h1><div class="muted small" id="objAddr"></div></div><div id="objArmed"></div></div>
+        <div class="tabs" role="tablist" style="padding:0 16px">
+          <button class="on" data-tab="info">Інформація</button>
+          <button data-tab="events">Події охорони</button>
+          <button data-tab="equip">Обладнання</button>
+          <button data-tab="people">Довірені особи</button>
+        </div>
+        <div class="card-b" data-pane="info">
+          <div class="grid g2">
+            <dl class="dl" id="objInfo"></dl>
+            <div class="grid" style="gap:10px;align-content:start">
+              <div class="muted small">Рівень захищеності <span class="src">кастом: оцінка з обладнання</span></div>
+              <div id="objLevel"></div>
+              <div class="btn-row"><a class="btn btn-primary" href="#pay">Сплатити</a><a class="btn" href="#subscription">Змінити тариф</a><a class="btn" href="#tickets">Повідомити про несправність</a></div>
+            </div>
+          </div>
+        </div>
+        <div class="card-b" data-pane="events" hidden><div class="muted small" style="margin-bottom:8px">Журнал з пульта централізованого спостереження <span class="src">ПЦС API (не Odoo)</span></div><div class="tl" id="objEvents"></div></div>
+        <div class="card-b" data-pane="equip" hidden><div class="tbl-wrap"><table><thead><tr><th>Пристрій</th><th>Зона</th><th>Стан</th><th class="r">Заряд</th></tr></thead><tbody id="objEquip"></tbody></table></div><div class="muted small" style="margin-top:8px"><span class="src">stock.lot / ПЦС</span></div></div>
+        <div class="card-b" data-pane="people" hidden><div class="tbl-wrap"><table><thead><tr><th>Ім'я</th><th>Телефон</th><th>Роль</th><th>Кодове слово</th></tr></thead><tbody>
+          <tr><td>Олена Коваль</td><td class="num">+380 67 000 11 22</td><td>Власник</td><td>●●●●●</td></tr>
+          <tr><td>Андрій Коваль</td><td class="num">+380 50 000 33 44</td><td>Довірена особа</td><td>●●●●●</td></tr>
+        </tbody></table></div><div class="muted small" style="margin-top:8px">Кодові слова не відображаються. <span class="src">res.partner (child_ids)</span></div></div>
+      </div>
+    </section>
+
+    <!-- SUBSCRIPTION -->
+    <section class="view" data-view="subscription" hidden>
+      <div class="card">
+        <div class="card-h" style="flex-wrap:wrap;gap:12px"><div><h1>S00148 · Квартира, вул. Січових Стрільців 21</h1><div class="muted small">План: щомісячно · з 12.03.2024 <span class="src">sale.order (is_subscription)</span></div></div>
+          <div class="statusbar" aria-label="Статус підписки"><span>Пропозиція</span><span class="on">Активна</span><span>Призупинена</span><span>Закрита</span></div></div>
+        <div class="card-b">
+          <div class="tbl-wrap"><table>
+            <thead><tr><th>Послуга <span class="src">sale.order.line</span></th><th class="r">К-сть</th><th class="r">Ціна</th><th class="r">Сума / міс</th></tr></thead>
+            <tbody>
+              <tr><td>Пультова охорона квартири<div class="muted small">Цілодобове спостереження, виїзд групи реагування</div></td><td class="r">1</td><td class="r">450 грн</td><td class="r">450 грн</td></tr>
+              <tr><td>Тривожна кнопка в застосунку</td><td class="r">1</td><td class="r">90 грн</td><td class="r">90 грн</td></tr>
+              <tr><td>Технічне обслуговування обладнання<div class="muted small">1 плановий виїзд на рік</div></td><td class="r">1</td><td class="r">80 грн</td><td class="r">80 грн</td></tr>
+            </tbody>
+            <tfoot><tr><td colspan="3">Разом щомісяця</td><td class="r">620 грн</td></tr></tfoot>
+          </table></div>
+        </div>
+      </div>
+      <div class="grid g2">
+        <div class="card"><div class="card-h"><h2>Змінити тариф</h2><span class="src">plan.related_plan_id</span></div>
+          <form class="card-b grid" style="gap:10px" data-form="Запит на зміну тарифу надіслано. Нова ціна діятиме з наступного періоду.">
+            <label class="plan-opt"><span><input type="radio" name="plan" id="planM" checked> Щомісячно</span><span class="price num">620 грн / міс</span><span class="muted small">Можна скасувати будь-коли</span></label>
+            <label class="plan-opt"><span><input type="radio" name="plan" id="planY"> Щороку</span><span class="price num">6 690 грн / рік</span><span class="badge b-ok" style="justify-self:start">−10%, фіксована ціна на рік</span></label>
+            <button class="btn btn-primary" style="justify-self:start">Перейти на обраний план</button>
+          </form></div>
+        <div class="card"><div class="card-h"><h2>Додаткові послуги</h2><span class="src">product.template (recurring)</span></div>
+          <div class="card-b grid" style="gap:12px" id="addons"></div></div>
+      </div>
+      <div class="card"><div class="card-h"><h2>Керування підпискою</h2></div>
+        <div class="card-b grid" style="gap:12px">
+          <label class="switch"><input type="checkbox" id="autopay" checked> Автоматичне списання з картки •••• 4417 <span class="src">payment_token_id</span></label>
+          <div class="btn-row">
+            <button class="btn" data-toast="Охорону буде призупинено з 01.12.2026. Абонплата на час паузи — 0 грн.">Призупинити на сезон</button>
+            <button class="btn btn-danger" data-toast="Щоб розірвати договір, менеджер зв'яжеться з вами протягом дня.">Розірвати договір</button>
+          </div>
+          <div class="muted small">Пауза і розірвання доступні, якщо це дозволяє план (<span class="src">pausable_by_user</span> <span class="src">user_closable</span>).</div>
+        </div></div>
+    </section>
+
+    <!-- PAY -->
+    <section class="view" data-view="pay" hidden>
+      <h1>Сплатити послуги</h1>
+      <div class="grid g2">
+        <form class="card" data-form="Оплату 780 грн прийнято. Кошти зарахуються протягом 30 хвилин.">
+          <div class="card-h"><h2>Онлайн-оплата</h2><span class="src">account.payment</span></div>
+          <div class="card-b grid" style="gap:12px">
+            <div class="field"><label for="payObj">Об'єкт</label><select id="payObj"><option>Квартира · вул. Січових Стрільців 21</option><option>Офіс · вул. Велика Васильківська 72</option><option>Усі об'єкти разом</option></select></div>
+            <div class="field"><label for="payAmt">Сума, грн</label><input type="number" id="payAmt" value="780" min="1"></div>
+            <div class="btn-row"><button class="btn btn-primary">Сплатити карткою</button><button type="button" class="btn" data-toast="Apple Pay / Google Pay відкриються на сторінці платіжного провайдера.">Apple Pay / Google Pay</button></div>
+            <div class="muted small">Карткою будь-якого українського банку. Комісія 0%.</div>
+          </div>
+        </form>
+        <div class="grid" style="align-content:start">
+          <div class="card kpi"><span class="muted small">До сплати</span><span class="v neg num">780 грн</span><span class="small">Рахунок INV/2026/10/0148 до 15.11.2026</span></div>
+          <div class="card"><div class="card-h"><h2>Рахунок для оплати за реквізитами</h2></div>
+            <div class="card-b grid" style="gap:10px"><span class="muted">Для юросіб і оплати через банк.</span><button class="btn" data-toast="Рахунок сформовано. Він з'явиться в розділі «Рахунки та акти».">Отримати рахунок</button></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LEDGER -->
+    <section class="view" data-view="ledger" hidden>
+      <div class="view-head"><h1>Історія взаєморозрахунків</h1><span class="muted small">Баланс: <b class="num" style="color:var(--danger)">−780 грн</b> <span class="src">account.move.line</span></span></div>
+      <div class="card tbl-wrap"><table>
+        <thead><tr><th>Дата</th><th>Операція</th><th class="r">Нараховано</th><th class="r">Сплачено</th><th class="r">Баланс</th></tr></thead>
+        <tbody id="ledgerRows"></tbody></table></div>
+    </section>
+
+    <!-- INVOICES -->
+    <section class="view" data-view="invoices" hidden>
+      <div class="view-head"><h1>Рахунки та акти</h1><button class="btn btn-primary" data-toast="Рахунок на листопад сформовано.">Отримати рахунок</button></div>
+      <div class="card tbl-wrap"><table>
+        <thead><tr><th>Документ <span class="src">account.move</span></th><th>Дата</th><th>Період</th><th class="r">Сума</th><th>Статус</th><th></th></tr></thead>
+        <tbody id="invRows"></tbody></table></div>
+    </section>
+
+    <!-- TICKETS -->
+    <section class="view" data-view="tickets" hidden>
+      <h1>Заявки</h1>
+      <div class="grid g2">
+        <div class="card"><div class="card-h"><h2>Мої заявки</h2><span class="src">helpdesk.ticket</span></div>
+          <div class="tbl-wrap"><table><thead><tr><th>№</th><th>Тема</th><th>Статус</th><th>SLA</th></tr></thead><tbody>
+            <tr><td class="num">#1042</td><td>Заміна батареї датчика руху (кухня)</td><td><span class="badge b-info">В роботі</span></td><td class="small">до 31.10</td></tr>
+            <tr><td class="num">#0987</td><td>Хибна тривога 12.09</td><td><span class="badge b-ok">Вирішено</span></td><td class="small">вчасно</td></tr>
+            <tr><td class="num">#0911</td><td>Зміна довіреної особи</td><td><span class="badge b-ok">Вирішено</span></td><td class="small">вчасно</td></tr>
+          </tbody></table></div></div>
+        <form class="card" data-form="Заявку #1043 створено. Відповімо протягом 2 годин.">
+          <div class="card-h"><h2>Нова заявка</h2></div>
+          <div class="card-b grid" style="gap:12px">
+            <div class="field"><label for="tType">Тема</label><select id="tType"><option>Несправність обладнання</option><option>Хибна тривога</option><option>Зміна контактів / довірених осіб</option><option>Фінансове питання</option><option>Модернізація обладнання</option><option>Інше</option></select></div>
+            <div class="field"><label for="tObj">Об'єкт</label><select id="tObj"><option>Квартира · вул. Січових Стрільців 21</option><option>Офіс · вул. Велика Васильківська 72</option></select></div>
+            <div class="field"><label for="tText">Опис</label><textarea id="tText">Датчик на вікні у вітальні показує низький заряд.</textarea></div>
+            <button class="btn btn-primary" style="justify-self:start">Надіслати</button>
+          </div></form>
+      </div>
+    </section>
+
+    <!-- VISITS -->
+    <section class="view" data-view="visits" hidden>
+      <h1>Виїзди техніка</h1>
+      <div class="card tbl-wrap"><table>
+        <thead><tr><th>Дата <span class="src">project.task (Field Service)</span></th><th>Об'єкт</th><th>Робота</th><th>Технік</th><th>Статус</th><th></th></tr></thead>
+        <tbody>
+          <tr><td class="num">31.10.2026 10:00–12:00</td><td>Квартира</td><td>Заміна батареї датчика</td><td>Сергій М.</td><td><span class="badge b-info">Заплановано</span></td><td><button class="btn btn-link" data-toast="Оберіть інший час — менеджер підтвердить.">Перенести</button></td></tr>
+          <tr><td class="num">14.05.2026</td><td>Офіс</td><td>Планове ТО, тест каналів зв'язку</td><td>Ігор Т.</td><td><span class="badge b-ok">Виконано</span></td><td><button class="btn btn-link" data-toast="Звіт про виїзд відкриється в PDF.">Звіт</button></td></tr>
+          <tr><td class="num">12.03.2024</td><td>Квартира</td><td>Монтаж системи Ajax</td><td>Сергій М.</td><td><span class="badge b-ok">Виконано</span></td><td><button class="btn btn-link" data-toast="Акт монтажу відкриється в PDF.">Акт</button></td></tr>
+        </tbody></table></div>
+    </section>
+
+    <!-- DOCUMENTS -->
+    <section class="view" data-view="documents" hidden>
+      <h1>Договори і підпис</h1>
+      <div class="card tbl-wrap"><table>
+        <thead><tr><th>Документ <span class="src">sign.request / documents</span></th><th>Дата</th><th>Статус</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>Додаткова угода: річний тариф</td><td class="num">28.10.2026</td><td><span class="badge b-warn">Очікує підпису</span></td><td><button class="btn btn-primary" data-toast="Відкриється форма підпису Odoo Sign.">Підписати</button></td></tr>
+          <tr><td>Договір охорони № SH-2026-0148 (офіс)</td><td class="num">02.02.2026</td><td><span class="badge b-ok">Підписано</span></td><td><button class="btn btn-link" data-toast="Документ відкриється в PDF.">PDF</button></td></tr>
+          <tr><td>Договір охорони № SH-2024-0391 (квартира)</td><td class="num">12.03.2024</td><td><span class="badge b-ok">Підписано</span></td><td><button class="btn btn-link" data-toast="Документ відкриється в PDF.">PDF</button></td></tr>
+        </tbody></table></div>
+    </section>
+
+    <!-- PROFILE -->
+    <section class="view" data-view="profile" hidden>
+      <h1>Профіль</h1>
+      <div class="grid g2">
+        <form class="card" data-form="Зміни збережено.">
+          <div class="card-h"><h2>Контактні дані</h2><span class="src">res.partner</span></div>
+          <div class="card-b grid" style="gap:12px">
+            <div class="field"><label for="pName">ПІБ</label><input type="text" id="pName" value="Коваль Олена Петрівна"></div>
+            <div class="field"><label for="pPhone">Телефон для входу</label><input type="tel" id="pPhone" value="+380 67 000 11 22"></div>
+            <div class="field"><label for="pMail">Email для рахунків</label><input type="email" id="pMail" value="olena.koval@example.com"></div>
+            <button class="btn btn-primary" style="justify-self:start">Зберегти</button>
+          </div></form>
+        <div class="card"><div class="card-h"><h2>Сповіщення</h2></div>
+          <div class="card-b grid" style="gap:12px">
+            <label class="switch"><input type="checkbox" id="nAlarm" checked> Тривоги та постановка/зняття — push і SMS</label>
+            <label class="switch"><input type="checkbox" id="nInv" checked> Нові рахунки — email</label>
+            <label class="switch"><input type="checkbox" id="nDebt" checked> Нагадування про борг — Viber</label>
+            <label class="switch"><input type="checkbox" id="nNews"> Новини та акції</label>
+          </div></div>
+      </div>
+    </section>
+
+    <!-- REFERRAL -->
+    <section class="view" data-view="referral" hidden>
+      <h1>Запроси друга</h1>
+      <div class="grid g2">
+        <div class="card"><div class="card-b grid" style="gap:12px">
+          <p style="margin:0;max-width:60ch">За кожного друга, який підключить охорону за вашим посиланням, ви отримаєте <b>500 грн</b> на рахунок, а друг — <b>250 грн</b> знижки на першу абонплату.</p>
+          <div class="copy-row"><input type="text" id="refLink" value="https://my.shield.ua/r/OK0148" readonly><button class="btn btn-primary" id="copyBtn">Скопіювати</button></div>
+          <div class="muted small">Бонуси зараховуються після підписання договору другом. <span class="src">кастом: loyalty / промокод</span></div>
+        </div></div>
+        <div class="grid g3" style="align-content:start">
+          <div class="card kpi"><span class="muted small">Запрошено</span><span class="v num">3</span></div>
+          <div class="card kpi"><span class="muted small">Підключилися</span><span class="v num">1</span></div>
+          <div class="card kpi"><span class="muted small">Бонуси</span><span class="v pos num">500 грн</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="view" data-view="faq" hidden>
+      <h1>Часті питання</h1>
+      <div class="card" id="faqList"></div>
+    </section>
+  </main>
+</div>
+
+<nav class="tabbar" aria-label="Головне меню">
+  <a href="#home" data-t="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>Головна</span></a>
+  <a href="#objects" data-t="objects,object"><svg viewBox="0 0 24 24"><path d="M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5z"/></svg><span>Об'єкти</span></a>
+  <a href="#pay" data-t="pay,ledger,invoices" class="pay"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span>Оплата</span></a>
+  <a href="#tickets" data-t="tickets,visits"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>Заявки</span></a>
+  <a href="#profile" data-t="profile,documents,subscription,referral,faq"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>Профіль</span></a>
+</nav>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+const objects=[
+  {id:'apt',name:'Квартира',addr:'Київ, вул. Січових Стрільців 21, кв. 14',armed:true,since:'сьогодні 08:42',contract:'SH-2024-0391',console:'100461',panel:'Ajax Hub 2 Plus',fee:620,balance:-780,level:85,
+   events:[['ok','Поставлено під охорону','Олена К. (застосунок)','30.10 08:42'],['ok','Знято з охорони','Олена К. (брелок)','29.10 19:10'],['warn','Низький заряд: датчик вікна, вітальня','автоматично','27.10 03:15'],['bad','Тривога: датчик руху, коридор — хибна, скасовано кодовим словом','оператор пульта','12.09 14:02'],['ok','Поставлено під охорону','Андрій К.','12.09 13:55']],
+   equip:[['Ajax Hub 2 Plus','—','У мережі · Ethernet + GSM','—'],['MotionProtect','Коридор','Норма','78%'],['DoorProtect','Вхідні двері','Норма','91%'],['DoorProtect','Вікно, вітальня','Низький заряд','9%'],['FireProtect','Кухня','Норма','64%']]},
+  {id:'off',name:'Офіс',addr:'Київ, вул. Велика Васильківська 72, оф. 305',armed:false,since:'сьогодні 09:05',contract:'SH-2026-0148',console:'100587',panel:'Ajax Hub 2 (4G)',fee:610,balance:0,level:60,
+   events:[['ok','Знято з охорони','Олена К. (клавіатура)','30.10 09:05'],['ok','Поставлено під охорону','Олена К.','29.10 18:30'],['ok','Планове ТО виконано','технік Ігор Т.','14.05 11:20']],
+   equip:[['Ajax Hub 2 (4G)','—','У мережі · GSM','—'],['MotionProtect','Приймальня','Норма','88%'],['GlassProtect','Вікна','Норма','95%']]}
+];
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const grn=n=>(n<0?'−':'')+Math.abs(n).toLocaleString('uk-UA')+' грн';
+
+function objCard(o){return `<div class="obj"${o!==objects[0]?' style="border-top:1px solid var(--border-soft)"':''}>
+  <div class="obj-top"><div class="obj-ico"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9H3z"/></svg></div>
+  <div style="min-width:0;flex:1"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>${o.name}</b>
+  <span class="armed"><span class="dot${o.armed?'':' off'}"></span>${o.armed?'Під охороною':'Знято з охорони'}</span></div>
+  <div class="muted small">${o.addr}</div></div></div>
+  <dl class="dl small"><dt>Пультовий №</dt><dd class="num">${o.console}</dd><dt>Абонплата</dt><dd class="num">${grn(o.fee)} / міс</dd><dt>Баланс</dt><dd class="num" style="color:${o.balance<0?'var(--danger)':'inherit'}">${grn(o.balance)}</dd></dl>
+  <div><a class="btn" href="#object-${o.id}">Переглянути</a></div></div>`}
+$('#homeObjects').innerHTML=objects.map(objCard).join('');
+$('#objList').innerHTML=objects.map(o=>`<div class="card">${objCard(o).replace(/ style="border-top[^"]*"/,'')}</div>`).join('');
+
+function showObject(id){
+  const o=objects.find(x=>x.id===id)||objects[0];
+  $('#objTitle').textContent=o.name+' · об’єкт № '+o.console;
+  $('#objAddr').textContent=o.addr;
+  $('#objArmed').innerHTML=`<span class="armed"><span class="dot${o.armed?'':' off'}"></span>${o.armed?'Під охороною':'Знято з охорони'} · ${o.since}</span> <span class="src">ПЦС API</span>`;
+  $('#objInfo').innerHTML=`<dt>Номер договору</dt><dd>${o.contract} <span class="src">sale.order.name</span></dd><dt>Пультовий номер</dt><dd class="num">${o.console}</dd><dt>Модель ППК</dt><dd>${o.panel}</dd><dt>Абонплата</dt><dd class="num">${grn(o.fee)} / міс</dd><dt>Баланс об'єкта</dt><dd class="num">${grn(o.balance)}</dd>`;
+  $('#objLevel').innerHTML=`<div style="height:8px;background:var(--surface-2);border:1px solid var(--border-soft);border-radius:4px;overflow:hidden"><div style="height:100%;width:${o.level}%;background:${o.level>=80?'var(--success)':'var(--warning)'}"></div></div><div class="small"><b class="num">${o.level}%</b> — ${o.level>=80?'добрий захист':'додайте датчики на вікна та резервний канал'}</div>`;
+  $('#objEvents').innerHTML=o.events.map(e=>`<div class="tl-item"><span class="tl-dot ${e[0]}"></span><div><b>${e[1]}</b><div class="muted small">${e[2]}</div></div><span class="muted small num">${e[3]}</span></div>`).join('');
+  $('#objEquip').innerHTML=o.equip.map(e=>`<tr><td>${e[0]}</td><td>${e[1]}</td><td>${/Низьк/.test(e[2])?'<span class="badge b-warn">'+e[2]+'</span>':e[2]}</td><td class="r">${e[3]}</td></tr>`).join('');
+  setTab('info');
+}
+function setTab(t){$$('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));$$('[data-pane]').forEach(p=>p.hidden=p.dataset.pane!==t)}
+$$('.tabs button').forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+
+$('#addons').innerHTML=[['Відеонагляд у хмарі','2 камери, архів 7 днів',190],['Фізична охорона на подію','Охоронець, від 4 годин',0],['Пожежний моніторинг','Датчики диму на пульт',70]].map(a=>`<div style="display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap"><div><b>${a[0]}</b><div class="muted small">${a[1]}</div></div><div style="display:flex;gap:10px;align-items:center"><span class="num">${a[2]?'+'+a[2]+' грн/міс':'за запитом'}</span><button class="btn" data-toast="«${a[0]}» додано до підписки з наступного періоду.">Додати</button></div></div>`).join('');
+
+const months=['05.2026','06.2026','07.2026','08.2026','09.2026','10.2026'];
+let bal=0;const led=[];
+months.forEach((m,i)=>{bal-=1230;led.push([`01.${m}`,`Абонплата за ${m} (2 об'єкти)`,1230,0,bal]);if(i<5){bal+=1230;led.push([`0${3+i%5}.${m}`,'Оплата карткою •••• 4417',0,1230,bal]);}});
+led.push(['18.10.2026','Часткова оплата',0,450,bal+=450]);
+$('#ledgerRows').innerHTML=led.reverse().map(r=>`<tr><td class="num">${r[0]}</td><td>${r[1]}</td><td class="r">${r[2]?grn(r[2]):''}</td><td class="r" style="color:var(--success)">${r[3]?grn(r[3]):''}</td><td class="r" style="color:${r[4]<0?'var(--danger)':'inherit'}">${grn(r[4])}</td></tr>`).join('');
+
+$('#invRows').innerHTML=[['INV/2026/10/0148','01.10.2026','жовтень 2026',1230,'part'],['INV/2026/09/0131','01.09.2026','вересень 2026',1230,'paid'],['INV/2026/08/0117','01.08.2026','серпень 2026',1230,'paid'],['Акт/2026/09/0131','30.09.2026','вересень 2026',1230,'act']].map(r=>`<tr><td>${r[0]}</td><td class="num">${r[1]}</td><td>${r[2]}</td><td class="r">${grn(r[3])}</td><td>${{part:'<span class="badge b-warn">Частково сплачено</span>',paid:'<span class="badge b-ok">Сплачено</span>',act:'<span class="badge b-mute">Акт</span>'}[r[4]]}</td><td>${r[4]==='part'?'<a class="btn btn-primary" href="#pay">Сплатити</a>':'<button class="btn btn-link" data-toast="PDF відкриється в новій вкладці.">PDF</button>'}</td></tr>`).join('');
+
+$('#faqList').innerHTML=[
+ ['Як скасувати хибну тривогу?','Зніміть систему з охорони в застосунку або брелоком і назвіть оператору кодове слово, коли він зателефонує. Якщо оператор не додзвонився, група реагування все одно приїде.'],
+ ['Який час реагування групи?','У межах міста — в середньому 7–12 хвилин. Точний норматив вказано в договорі для кожного об’єкта.'],
+ ['Що буде при відключенні світла чи зв’язку?','Централь працює від акумулятора до 16 годин і перемикається між Ethernet, Wi-Fi та SIM. Якщо всі канали втрачено, пульт бачить втрату зв’язку і телефонує вам.'],
+ ['Що таке переліміт виїздів?','Тариф включає певну кількість виїздів на хибні тривоги на місяць. Понад ліміт кожен виїзд оплачується окремо за тарифом.'],
+ ['Як отримати оригінали рахунків і актів?','Усі документи доступні в розділі «Рахунки та акти». Паперові оригінали можна замовити через заявку з темою «Фінансове питання».'],
+ ['Як призупинити охорону на сезон?','У розділі «Підписки і тарифи» натисніть «Призупинити на сезон». На час паузи абонплата не нараховується.'],
+ ['Як розірвати або переоформити договір?','Створіть заявку або натисніть «Розірвати договір» у розділі підписок. Менеджер узгодить дату й підготує документи на підпис онлайн.']
+].map(f=>`<details class="faq"><summary>${f[0]}</summary><p>${f[1]}</p></details>`).join('');
+
+const titles={home:'Головна',objects:"Мої об'єкти",object:"Об'єкт",subscription:'Підписки і тарифи',pay:'Сплатити послуги',ledger:'Історія розрахунків',invoices:'Рахунки та акти',tickets:'Заявки',visits:'Виїзди техніка',documents:'Договори і підпис',profile:'Профіль',referral:'Запроси друга',faq:'Часті питання'};
+function route(){
+  let h=(location.hash||'#home').slice(1);let v=h,arg=null;
+  if(h.startsWith('object-')){v='object';arg=h.slice(7)}
+  if(!titles[v])v='home';
+  $$('[data-view]').forEach(s=>s.hidden=s.dataset.view!==v);
+  $$('.side a').forEach(a=>a.classList.toggle('active',a.dataset.v===v||(v==='object'&&a.dataset.v==='objects')));
+  if(v==='object')showObject(arg);
+  const trail=v==='home'?['Головна']:v==='object'?['<a href="#home">Головна</a>','<a href="#objects">Мої об’єкти</a>',objects.find(o=>o.id===arg)?.name||'Об’єкт']:['<a href="#home">Головна</a>',titles[v]];
+  $('#crumbs').innerHTML=trail.join(' / ');
+  window.scrollTo(0,0);
+}
+addEventListener('hashchange',route);route();
+
+let tt;function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,3500)}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-toast]');if(b){e.preventDefault();toast(b.dataset.toast)}});
+$$('form[data-form]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();toast(f.dataset.form)}));
+$('#autopay').onchange=e=>toast(e.target.checked?'Автоплатіж увімкнено.':'Автоплатіж вимкнено. Рахунки потрібно буде сплачувати вручну.');
+$('#copyBtn').onclick=()=>{const v=$('#refLink').value;(navigator.clipboard?navigator.clipboard.writeText(v):Promise.reject()).then(()=>toast('Посилання скопійовано.')).catch(()=>{$('#refLink').select();toast('Виділено — натисніть Ctrl+C.')})};
+const st=$('#srcToggle');try{st.checked=localStorage.getItem('src')==='1'}catch(e){}
+const applySrc=()=>{$('#shell').classList.toggle('show-src',st.checked);try{localStorage.setItem('src',st.checked?'1':'0')}catch(e){}};
+st.onchange=applySrc;applySrc();
+</script>
+
+<script>document.addEventListener('click',function(e){var a=e.target.closest('a.back-site');if(!a||e.metaKey||e.ctrlKey)return;e.preventDefault();document.body.classList.add('leaving');setTimeout(function(){location.href=a.href},320)});window.addEventListener('pageshow',function(){document.body.classList.remove('leaving')});</script>
+<script src="shiny-button.js?v=20260923l"></script><script>if(window.ShinyButton)ShinyButton.initShinyButtons(".back-site");</script>
+<script>(function(){
+var P={wallet:'<rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20M16 15h2"/>',
+repeat:'<path d="M17 2l4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 0 1-3 3H3"/>',
+doc:'<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h6M9 17h6"/>',
+chat:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+shield:'<path d="M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5z"/><path d="M9 12l2 2 4-4"/>',
+bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+phone:'<path d="M22 17v3a2 2 0 0 1-2.2 2A19 19 0 0 1 2 4.2 2 2 0 0 1 4 2h3l2 5-2.5 1.5a14 14 0 0 0 7 7L15 13l5 2z"/>',
+clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+tool:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-2.5z"/>',
+pen:'<path d="M4 20h4L18.5 9.5a2.8 2.8 0 0 0-4-4L4 16z"/>',
+user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+gift:'<path d="M20 12v9H4v-9M2 7h20v5H2zM12 22V7M12 7H8a2.5 2.5 0 1 1 0-5c3 0 4 5 4 5zM12 7h4a2.5 2.5 0 1 0 0-5c-3 0-4 5-4 5z"/>',
+help:'<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/>',
+chart:'<path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/>',
+card:'<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>',
+plus:'<path d="M12 5v14M5 12h14"/>'};
+function svg(k,c){return '<svg class="'+(c||'')+'" viewBox="0 0 24 24">'+P[k]+'</svg>'}
+function pick(t){t=t.toLowerCase();
+ var m=[['баланс','wallet'],['абонплат','repeat'],['рахун','doc'],['заявк','chat'],['об\'єкт','shield'],['швидк','bolt'],['телефон','phone'],['контакт','phone'],['виїзд','tool'],['історі','clock'],['подій','clock'],['платіж','card'],['оплат','card'],['договор','pen'],['профіл','user'],['друг','gift'],['питан','help'],['тариф','repeat'],['підписк','repeat'],['послуг','plus'],['обладнан','tool'],['розрахун','chart']];
+ for(var i=0;i<m.length;i++)if(t.indexOf(m[i][0])>-1)return m[i][1];return 'shield'}
+function run(){
+ document.querySelectorAll('.card-h h2:not([data-ic]),.card-h h3:not([data-ic])').forEach(function(h){h.setAttribute('data-ic',1);h.insertAdjacentHTML('afterbegin','<span class="ic">'+svg(pick(h.textContent))+'</span>')});
+ document.querySelectorAll('.kpi:not([data-ic])').forEach(function(k){k.setAttribute('data-ic',1);var l=k.querySelector('.muted');k.insertAdjacentHTML('afterbegin','<span class="ic">'+svg(pick(l?l.textContent:''))+'</span>')});
+ document.querySelectorAll('.btn-row .btn:not([data-ic])').forEach(function(b){b.setAttribute('data-ic',1);var k=pick(b.textContent);b.insertAdjacentHTML('afterbegin',svg(k==='shield'?'bolt':k,'bi'))});
+}
+run();window.addEventListener('hashchange',function(){setTimeout(run,60)});document.addEventListener('click',function(){setTimeout(run,120)});
+})();</script>
+<script>(function(){function sync(){var v=(location.hash||'#home').slice(1).split('/')[0];document.querySelectorAll('.tabbar a').forEach(function(a){a.classList.toggle('on',a.getAttribute('data-t').split(',').indexOf(v)>-1)})}sync();window.addEventListener('hashchange',sync)})();</script>
+</body></html>
